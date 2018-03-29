@@ -37,7 +37,8 @@
 #define SCORE_SHOW   5
 
 // Use button P1.1 (known as button 2)
-#define BUTTON BUTTON_2
+#define START_BUTTON BUTTON_2
+#define STOP_BUTTON  BUTTON_1
 
 
 void setup();
@@ -75,7 +76,8 @@ void setup_timer() {
 void setup() {
     setup_led(RED_LED);
     setup_led(GREEN_LED);
-    setup_button(BUTTON, PULL_UP, FALLING_EDGE, INTERRUPT_ENABLED);
+    setup_button(START_BUTTON, PULL_UP, FALLING_EDGE, INTERRUPT_DISABLED);
+    setup_button(STOP_BUTTON, PULL_UP, FALLING_EDGE, INTERRUPT_ENABLED);
     setup_timer();
     __enable_interrupt();
 }
@@ -89,8 +91,7 @@ int counter = 0; // Counter updated by the timer
 
 void run() {
     while (1) {
-        // This method defined by mspapi will wait and debounce the button press
-        wait_button_click(BUTTON);
+        while (!is_pressed(START_BUTTON));// Wait until the start button gets pressed
         counter = 0;// Reset the counter
         led_on(RED_LED);// Light up the red led
         state = INIT_WAIT;
@@ -150,8 +151,8 @@ __interrupt void timer1_isr(void) {
     set_off(TA0CTL, TAIFG);
 }
 
-#pragma vector=BTN_VECTOR(BUTTON)
-__interrupt void button_isr(void) {
+#pragma vector=BTN_VECTOR(STOP_BUTTON)
+__interrupt void stop_button_isr(void) {
     switch (state) {
     case PLAYER_INPUT:
         // Normal player input (end game normally)
@@ -162,7 +163,7 @@ __interrupt void button_isr(void) {
         state = GAME_ABORT;
         break;
     }
-    reset_interrupt(BUTTON);
+    reset_interrupt(STOP_BUTTON);
 }
 
 // -------------------- END PROGRAM --------------------

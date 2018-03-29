@@ -107,6 +107,9 @@
     }\
 } while (0);
 
+#define is_pressed(dev) _is_pressed(dev)
+#define _is_pressed(port, mask, vector) ((GET(port, PIN) & mask) == 0)
+
 #define _BTN_VECTOR(port, mask, vector) vector
 #define BTN_VECTOR(dev) _BTN_VECTOR(dev)
 
